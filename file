@@ -1,0 +1,24 @@
+Наша задача: каждую ночь (день, вечер), после того, как все новые бэкапы будут сделаны, копировать их на S3, а также удалять оттуда старые — те, 
+которых в /home/backup больше нет
+Первым делом устанавливаем Ruby:
+sudo apt-get install ruby-full
+
+Далее скачиваем и распаковываем s3sync:
+wget s3.amazonaws.com/ServEdge_pub/s3sync/s3sync.tar.gz
+
+Создаем bash скрипт, который и будем запускать по крону:
+nano go-s3sync-backup.sh
+
+#/bin/sh
+export AWS_ACCESS_KEY_ID=[ваш AWS_ACCESS_KEY_ID]
+export AWS_SECRET_ACCESS_KEY=[ваш AWS_SECRET_ACCESS_KEY]
+/home/user/s3sync/s3sync.rb --delete -r /home/backup/ [имя корзины на S3]:my-backup
+
+chmod +x go-s3sync-backup.sh
+
+Результатом работы скрипта будет папка my-backup в указанной корзине на S3 с вашими резервными копиями.
+
+
+Добавляем наш скрипт в крон (скажем, пусть работает каждый день в 7 утра)
+
+0 7 * * * /home/user/go-s3sync-backup.sh
